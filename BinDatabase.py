@@ -95,5 +95,20 @@ class BinDatabase:
         cursor.execute('SELECT COUNT(*) FROM bank_urls WHERE processed = TRUE')
         return cursor.fetchone()[0]
     
+    def export_bins_to_csv(self, csv_path: str) -> None:
+        cursor = self.conn.cursor()
+        cursor.execute('''
+            SELECT bin_number, pays, emetteur, marque_carte, type_carte, niveau_carte 
+            FROM bin_cards
+        ''')
+        
+        import csv
+        with open(csv_path, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            # Write headers
+            writer.writerow(['BIN', 'Pays', 'Emetteur', 'Marque', 'Type', 'Niveau'])
+            # Write data
+            writer.writerows(cursor.fetchall())
+        
     def close(self):
         self.conn.close()

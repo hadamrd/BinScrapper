@@ -1,11 +1,11 @@
+import os
 import requests
-import json
 
 class BinChecker:
     def __init__(self):
         self.base_url = "https://bin-ip-checker.p.rapidapi.com"
         self.headers = {
-            "x-rapidapi-key": "e0c44abb9cmshc3002bae501d16ep1ad210jsn95fc6eb89fce",
+            "x-rapidapi-key": os.getenv("RAPIDAPI_KEY"),
             "x-rapidapi-host": "bin-ip-checker.p.rapidapi.com",
             "Content-Type": "application/json"
         }
