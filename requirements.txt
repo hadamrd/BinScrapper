@@ -2,3 +2,5 @@ bs4
 prettytable
 requests
 tqdm
+fastapi
+uvicorn

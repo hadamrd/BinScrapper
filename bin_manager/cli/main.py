@@ -4,6 +4,10 @@ from typing import List, Dict
 import sys
 from prettytable import PrettyTable
 
+from bin_manager.cli.check_bin import BinChecker
+from bin_manager.cli.collect_urls import collect_bank_urls
+from bin_manager.cli.scrap_bins import scrap_bins
+
 class BinCLI:
     def __init__(self, db_path: str = 'bin_database.db'):
         self.conn = sqlite3.connect(db_path)
@@ -115,6 +119,9 @@ def main():
     parser.add_argument('--country-bank', nargs=2, metavar=('COUNTRY', 'BANK'),
                        help='List all BINs for a specific bank in a specific country')
     parser.add_argument('--stats', action='store_true', help='Show database statistics')
+    parser.add_argument('--check', help='Check if a bin is correct using bin-ip-checker', nargs=1, metavar=('BIN'))
+    parser.add_argument('--collect-urls', action='store_true', help='Collect bank URLs for scraping')
+    parser.add_argument('--scrape', action='store_true', help='Scrape BIN data from bank URLs')
     
     args = parser.parse_args()
     
@@ -150,6 +157,17 @@ def main():
         elif args.stats:
             stats = cli.get_statistics()
             display_statistics(stats)
+        
+        elif args.check:
+            BinChecker().check_bin(args.check[0])
+        
+        elif args.collect_urls:
+            collect_bank_urls()
+            
+        elif args.scrape:
+            scrap_bins()
+            
+            
 
     finally:
         cli.close()

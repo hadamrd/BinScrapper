@@ -4,6 +4,10 @@ import requests
 class BinChecker:
     def __init__(self):
         self.base_url = "https://bin-ip-checker.p.rapidapi.com"
+        # check if key is set
+        if not os.getenv("RAPIDAPI_KEY"):
+            raise Exception("RAPIDAPI_KEY environment variable not set. Please set it to your bin-ip-checker.p.rapidapi.com api key.")
+        
         self.headers = {
             "x-rapidapi-key": os.getenv("RAPIDAPI_KEY"),
             "x-rapidapi-host": "bin-ip-checker.p.rapidapi.com",

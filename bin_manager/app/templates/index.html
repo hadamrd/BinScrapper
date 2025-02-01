@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <script src="/static/js/app.js" defer></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/2.3.0/alpine.js"></script>
+</head>
+<body class="bg-gray-100">
+    <div x-data="dashboard()"  x-init="init()" class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="bg-white shadow rounded-lg p-6 mb-8">
+            <h1 class="text-2xl font-bold mb-4">BIN Database Manager</h1>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <div class="text-sm text-blue-600">Total Banks</div>
+                    <div class="text-2xl font-bold" x-text="stats.total_banks"></div>
+                </div>
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <div class="text-sm text-green-600">Processed Banks</div>
+                    <div class="text-2xl font-bold" x-text="stats.processed_banks"></div>
+                </div>
+                <div class="bg-purple-50 p-4 rounded-lg">
+                    <div class="text-sm text-purple-600">Completion</div>
+                    <div class="text-2xl font-bold" x-text="formatPercentage(stats.completion_percentage) + '%'"></div>
+                </div>
+                <div class="bg-yellow-50 p-4 rounded-lg">
+                    <div class="text-sm text-yellow-600">Processed BINs</div>
+                    <div class="text-2xl font-bold" x-text="scrapingStatus.processed_bins"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- URL Collection Control -->
+        <div class="bg-white shadow rounded-lg p-6 mb-8">
+            <h2 class="text-xl font-bold mb-4">URL Collection</h2>
+            <div class="flex items-center space-x-4 mb-4">
+                <button 
+                    @click="toggleUrlCollection"
+                    :class="urlStatus.is_running ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'"
+                    class="px-4 py-2 text-white rounded-lg transition-colors">
+                    <span x-text="urlStatus.is_running ? 'Stop Collection' : 'Start Collection'"></span>
+                </button>
+                <div x-show="urlStatus.is_running" class="text-sm text-gray-600">
+                    Processing country: <span x-text="urlStatus.current_country" class="font-medium"></span>
+                </div>
+            </div>
+            <div x-show="urlStatus.is_running" class="space-y-2">
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div class="bg-blue-600 h-2.5 rounded-full transition-all duration-500"
+                         :style="'width: ' + (urlStatus.processed_countries / urlStatus.total_countries * 100) + '%'">
+                    </div>
+                </div>
+                <div class="text-sm text-gray-600">
+                    URLs Collected: <span x-text="urlStatus.collected_urls" class="font-medium"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scraping Control -->
+        <div class="bg-white shadow rounded-lg p-6 mb-8">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">BIN Scraping</h2>
+                <div class="flex space-x-2">
+                    <!-- Resume Button (shows only when resumable) -->
+                    <button 
+                        x-show="!scrapingStatus.is_running && scrapingStatus.resumable && scrapingStatus.total_banks > 0"
+                        @click="startScraping(true)"
+                        class="bg-yellow-500 hover:bg-yellow-600 px-4 py-2 text-white rounded-lg transition-colors">
+                        Resume Scraping
+                    </button>
+                    
+                    <!-- Start/Stop Button (shows when not resumable OR while running) -->
+                    <button 
+                        x-show="scrapingStatus.is_running || !scrapingStatus.resumable || scrapingStatus.total_banks === 0"
+                        @click="toggleScraping"
+                        :class="scrapingStatus.is_running ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'"
+                        class="px-4 py-2 text-white rounded-lg transition-colors">
+                        <span x-text="scrapingStatus.is_running ? 'Stop Scraping' : 'Start Scraping'"></span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Progress Information -->
+            <div class="space-y-4">
+                <!-- Status Message -->
+                <div class="text-sm text-gray-600" x-show="scrapingStatus.is_running || scrapingStatus.last_update">
+                    <template x-if="scrapingStatus.is_running">
+                        <p>
+                            Currently processing: 
+                            <span class="font-medium" x-text="scrapingStatus.current_bank"></span>
+                        </p>
+                    </template>
+                    <template x-if="scrapingStatus.last_update && !scrapingStatus.is_running">
+                        <p>
+                            Last run: 
+                            <span class="font-medium" x-text="formatTime(scrapingStatus.last_update)"></span>
+                        </p>
+                    </template>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="space-y-2">
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div class="bg-blue-600 h-2.5 rounded-full transition-all duration-500"
+                            :style="'width: ' + scrapingStatus.completion_percentage + '%'">
+                        </div>
+                    </div>
+                    <div class="flex justify-between text-sm text-gray-600">
+                        <span x-text="scrapingStatus.processed_banks + ' / ' + scrapingStatus.total_banks + ' banks'"></span>
+                        <span x-text="formatPercentage(scrapingStatus.completion_percentage) + '%'"></span>
+                    </div>
+                </div>
+
+                <!-- Statistics Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4" x-show="scrapingStatus.is_running || scrapingStatus.processed_bins > 0">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <div class="text-sm text-blue-600">Collected BINs</div>
+                        <div class="text-xl font-bold" x-text="scrapingStatus.processed_bins"></div>
+                    </div>
+                    <div class="bg-yellow-50 p-4 rounded-lg">
+                        <div class="text-sm text-yellow-600">Processing Rate</div>
+                        <div class="text-xl font-bold" x-text="scrapingStatus.rate + ' banks/min'"></div>
+                    </div>
+                    <div class="bg-purple-50 p-4 rounded-lg">
+                        <div class="text-sm text-purple-600">Estimated Time</div>
+                        <div class="text-xl font-bold" x-text="scrapingStatus.eta"></div>
+                    </div>
+                </div>
+
+                <!-- Failed URLs -->
+                <div x-show="scrapingStatus.failed_urls.length > 0" class="mt-4">
+                    <h3 class="text-sm font-semibold text-gray-700 mb-2">Failed URLs</h3>
+                    <div class="bg-red-50 p-4 rounded-lg max-h-40 overflow-y-auto">
+                        <template x-for="url in scrapingStatus.failed_urls" :key="url">
+                            <div class="text-sm text-red-600" x-text="url"></div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Section -->
+        <div class="bg-white shadow rounded-lg p-6 mb-8">
+            <h2 class="text-xl font-bold mb-4">Search BINs</h2>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                <input type="text" x-model="search.bin" placeholder="BIN prefix" 
+                       class="border p-2 rounded-lg">
+                <input type="text" x-model="search.bank" placeholder="Bank name" 
+                       class="border p-2 rounded-lg">
+                <input type="text" x-model="search.country" placeholder="Country" 
+                       class="border p-2 rounded-lg">
+                <button @click="performSearch" 
+                        class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                    Search
+                </button>
+            </div>
+
+            <!-- Results Table -->
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">BIN</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bank</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Country</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Brand</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Level</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <template x-for="result in searchResults" :key="result.bin">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap" x-text="result.bin"></td>
+                                <td class="px-6 py-4 whitespace-nowrap" x-text="result.bank"></td>
+                                <td class="px-6 py-4 whitespace-nowrap" x-text="result.country"></td>
+                                <td class="px-6 py-4 whitespace-nowrap" x-text="result.brand"></td>
+                                <td class="px-6 py-4 whitespace-nowrap" x-text="result.type"></td>
+                                <td class="px-6 py-4 whitespace-nowrap" x-text="result.level"></td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>

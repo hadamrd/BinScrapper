@@ -1,0 +1,22 @@
+# pyproject.toml
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bin_manager"
+version = "0.1.0"
+description = "BIN Database Management System"
+requires-python = ">=3.7"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "jinja2",
+    "beautifulsoup4",
+    "requests",
+    "tqdm",
+    "prettytable",
+]
+
+[tool.setuptools]
+packages = ["bin_manager"]
