@@ -13,7 +13,7 @@ with tqdm(total=total_urls, initial=processed_urls) as pbar:
         bank_table = scrape_bank_page(url_data['url'])
         if bank_table:
             db.insert_bank_data(bank_table, url_data['id'])
-            db.mark_url_processed(url_data['id'])
+        db.mark_url_processed(url_data['id'])
         pbar.update(1)
         time.sleep(0.5)
 
