@@ -13,5 +13,5 @@ class BinChecker:
         self.session.headers.update(self.headers)
 
     def get_info_by_bin(self, bin_number, ip="2.56.188.79"):
-        response = self.session.post(f"{self.base_url}/?bin={bin_number}&ip=2.56.188.79")
+        response = self.session.post(f"{self.base_url}/?bin={bin_number}&ip={ip}")
         return response.json()
