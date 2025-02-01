@@ -6,10 +6,10 @@ A simple and powerful tool to collect, store, and look up Bank Identification Nu
 
 The project consists of three main parts that work together:
 
-### 1. Data Collector
+### 1. Scrapper that does the following tasks
 Gets BIN data from online sources in two easy steps:
 - First, it finds all the bank pages across different countries
-- Then, it goes through each bank's page to get their BIN information
+- Then, go through each bank's page to get their BIN information (resumable)
 Don't worry about timeouts or failures - the tool is built to handle interruptions gracefully.
 
 ### 2. Storage
@@ -18,12 +18,26 @@ Uses a simple SQLite database to keep everything organized:
 - Stores all the BIN details like issuer, brand, type, and level
 You can stop and resume the collection process anytime - no data will be lost!
 
-### 3. Search Tool
+### 3. CLI tool that allows to run these and do some other queries
 A friendly command-line tool that lets you:
-- Look up any BIN
-- Find all BINs for a specific bank
-- See which banks operate in a country
-- Get insights about your BIN database
+```shell
+python -m bin_manager.cli.main -h
+
+usage: main.py [-h] [--bin BIN] [--bank BANK] [--country COUNTRY] [--country-bank COUNTRY BANK] [--stats] [--check BIN] [--collect-urls] [--scrape]
+
+BIN Database Query Tool
+
+options:
+  -h, --help                    show this help message and exit
+  --bin BIN                     Find information for a specific BIN
+  --bank BANK                   List all BINs for a specific bank
+  --country COUNTRY             List all banks in a specific country
+  --country-bank COUNTRY BANK   List all BINs for a specific bank in a specific country
+  --stats                       Show database statistics
+  --check BIN                   Check if a bin is correct using bin-ip-checker
+  --collect-urls                Collect bank URLs for scraping
+  --scrape                      Scrape BIN data from bank URLs
+```
 
 ## Getting Started
 
@@ -38,17 +52,22 @@ source .venv/bin/activate  # On Windows, use: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-## Collecting the Data
+2. Run the app
+```bash
+python -m bin_manager.app.main
+```
+
+## If you are more of a cli guy
 
 ### Step 1: Get the Bank List
 ```bash
-python scrap_all_banks_urls.py
+python -m bin_manager.cli.main --collect-urls
 ```
 This creates your database and finds all the bank pages we'll need to check.
 
 ### Step 2: Get the BIN Data
 ```bash
-python scrap_all_banks_bins.py
+python -m bin_manager.cli.main --scrape
 ```
 This gets the actual BIN information from each bank. If something interrupts it, just run it again - it'll pick up where it left off.
 
@@ -58,38 +77,29 @@ Here's how you can find what you need:
 
 ### Look Up a BIN
 ```bash
-python bin_cli.py --bin 123456
+python -m bin_manager.cli.main --bin 123456
 ```
 
 ### Find All BINs for a Bank
 ```bash
-python bin_cli.py --bank "HSBC"
+python -m bin_manager.cli.main --bank "HSBC"
 ```
 
 ### See Banks in a Country
 ```bash
-python bin_cli.py --country "France"
+python -m bin_manager.cli.main --country "France"
 ```
 
 ### Find a Bank's BINs in a Specific Country
 ```bash
-python bin_cli.py --country-bank "France" "BNP Paribas"
+python -m bin_manager.cli.main --country-bank "France" "BNP Paribas"
 ```
 
 ### See Your Database Stats
 ```bash
-python bin_cli.py --stats
+python -m bin_manager.cli.main --stats
 ```
 
-## Files You'll Find
-```
-.
-├── BinScraper.py      # Gets the data from the web
-├── BinDatabase.py     # Handles data storage
-├── bin_cli.py         # Search tool
-├── requirements.txt   # What you need to install
-└── logs/              # Keeps track of what's happening
-```
 
 ## Want to Help?
 
