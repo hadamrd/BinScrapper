@@ -16,7 +16,7 @@ def collect_bank_urls():
         retry_attempts=5,
         retry_backoff=1,
         timeout=15,
-        delay=0.8  # Balanced delay for reliability
+        delay=0.0  # Balanced delay for reliability
     )
     scraper = BinScraper(config)
     

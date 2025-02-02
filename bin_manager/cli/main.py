@@ -7,6 +7,7 @@ from prettytable import PrettyTable
 from bin_manager.cli.check_bin import BinChecker
 from bin_manager.cli.collect_urls import collect_bank_urls
 from bin_manager.cli.scrap_bins import scrap_bins
+from bin_manager.db.database import BinDatabase
 
 class BinCLI:
     def __init__(self, db_path: str = 'bin_database.db'):
@@ -122,6 +123,7 @@ def main():
     parser.add_argument('--check', help='Check if a bin is correct using bin-ip-checker', nargs=1, metavar=('BIN'))
     parser.add_argument('--collect-urls', action='store_true', help='Collect bank URLs for scraping')
     parser.add_argument('--scrape', action='store_true', help='Scrape BIN data from bank URLs')
+    parser.add_argument('--export-to-csv', help='Export BIN data to CSV', nargs=1, metavar=('FILENAME'))
     
     args = parser.parse_args()
     
@@ -166,8 +168,10 @@ def main():
             
         elif args.scrape:
             scrap_bins()
-            
-            
+        
+        elif args.export_to_csv:
+            db = BinDatabase()
+            db.export_bins_to_csv(args.export_to_csv[0])
 
     finally:
         cli.close()
