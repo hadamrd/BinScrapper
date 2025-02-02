@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import argparse
 import sqlite3
 from typing import List, Dict

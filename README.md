@@ -21,9 +21,9 @@ You can stop and resume the collection process anytime - no data will be lost!
 ### 3. CLI tool that allows to run these and do some other queries
 A friendly command-line tool that lets you:
 ```shell
-python -m bin_manager.cli.main -h
+./bin-cli -h
 
-usage: main.py [-h] [--bin BIN] [--bank BANK] [--country COUNTRY] [--country-bank COUNTRY BANK] [--stats] [--check BIN] [--collect-urls] [--scrape]
+usage: ./bin-cli [-h] [--bin BIN] [--bank BANK] [--country COUNTRY] [--country-bank COUNTRY BANK] [--stats] [--check BIN] [--collect-urls] [--scrape]
 
 BIN Database Query Tool
 
@@ -37,6 +37,7 @@ options:
   --check BIN                   Check if a bin is correct using bin-ip-checker
   --collect-urls                Collect bank URLs for scraping
   --scrape                      Scrape BIN data from bank URLs
+  --export-to-csv FILEPATH      Export bins db to csv file
 ```
 
 ## Getting Started
@@ -61,13 +62,13 @@ python -m bin_manager.app.main
 
 ### Step 1: Get the Bank List
 ```bash
-python -m bin_manager.cli.main --collect-urls
+./bin-cli --collect-urls
 ```
 This creates your database and finds all the bank pages we'll need to check.
 
 ### Step 2: Get the BIN Data
 ```bash
-python -m bin_manager.cli.main --scrape
+./bin-cli --scrape
 ```
 This gets the actual BIN information from each bank. If something interrupts it, just run it again - it'll pick up where it left off.
 
@@ -77,27 +78,27 @@ Here's how you can find what you need:
 
 ### Look Up a BIN
 ```bash
-python -m bin_manager.cli.main --bin 123456
+./bin-cli --bin 123456
 ```
 
 ### Find All BINs for a Bank
 ```bash
-python -m bin_manager.cli.main --bank "HSBC"
+./bin-cli --bank "HSBC"
 ```
 
 ### See Banks in a Country
 ```bash
-python -m bin_manager.cli.main --country "France"
+./bin-cli --country "France"
 ```
 
 ### Find a Bank's BINs in a Specific Country
 ```bash
-python -m bin_manager.cli.main --country-bank "France" "BNP Paribas"
+./bin-cli --country-bank "France" "BNP Paribas"
 ```
 
 ### See Your Database Stats
 ```bash
-python -m bin_manager.cli.main --stats
+./bin-cli --stats
 ```
 
 
