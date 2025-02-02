@@ -110,6 +110,7 @@ Feel free to jump in! Whether you've found a bug or have an idea to make it bett
 This project is open source under the MIT License.
 
 ## Current db stats
+```
 Database Statistics:
 Total BINs: 161,660
 Unique Banks: 16,573
@@ -178,3 +179,4 @@ JCB/LANKAPAY: 1
 JCB/CHINA UNION PAY: 1
 GLOBAL BC: 1
 AURA: 1
+```
